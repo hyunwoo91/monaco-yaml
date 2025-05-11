@@ -1,7 +1,22 @@
 import * as monaco from 'monaco-editor'
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import { configureMonacoYaml } from 'monaco-yaml'
-import YamlWorker from 'monaco-yaml/yaml.worker?worker'
+import YamlWorker from './yaml.worker.js?worker'
+
+/*
+window.MonacoEnvironment = {
+  getWorker(moduleId, label) {
+    switch (label) {
+      case 'editorWorkerService':
+        return new Worker(new URL('monaco-editor/esm/vs/editor/editor.worker', import.meta.url))
+      case 'yaml':
+        return new Worker(new URL('monaco-yaml/yaml.worker', import.meta.url))
+      default:
+        throw new Error(`Unknown label ${label}`)
+    }
+  }
+}
+ */
 
 window.MonacoEnvironment = {
   getWorker(moduleId, label) {
@@ -18,10 +33,13 @@ window.MonacoEnvironment = {
 
 configureMonacoYaml(monaco, {
   enableSchemaRequest: true,
+  completion: true,
+  hover: true,
+  validate: true,
   schemas: [
     {
       // If YAML file is opened matching this glob
-      fileMatch: ['**/.prettierrc.*'],
+      fileMatch: ['**/*.yaml'],
       // Then this schema will be downloaded from the internet and used.
       uri: 'https://json.schemastore.org/prettierrc.json'
     },
@@ -57,11 +75,13 @@ const prettierc = monaco.editor.createModel(
   monaco.Uri.parse('file:///.prettierrc.yaml')
 )
 
+/*
 monaco.editor.createModel(
   'name: John Doe\nage: 42\noccupation: Pirate\n',
   undefined,
   monaco.Uri.parse('file:///person.yaml')
 )
+ */
 
 const editor = monaco.editor.create(document.getElementById('editor'), {
   automaticLayout: true,
